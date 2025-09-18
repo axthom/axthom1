@@ -1,1 +1,12 @@
-<html><head>Hello</head><body>World</body></html>
+<!doctype html>
+<meta charset="utf-8">
+<title>HTML Loader</title>
+<script>
+  try {
+    const b64 = location.hash.slice(1); // after '#'
+    const html = atob(b64);
+    document.open(); document.write(html); document.close();
+  } catch (e) {
+    document.body.textContent = "Failed to load HTML payload.";
+  }
+</script>
