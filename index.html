@@ -2,11 +2,26 @@
 <meta charset="utf-8">
 <title>HTML Loader</title>
 <script>
-  try {
-    const b64 = location.hash.slice(1); // after '#'
-    const html = atob(b64);
-    document.open(); document.write(html); document.close();
-  } catch (e) {
-    document.body.textContent = "Failed to load HTML payload.";
+(() => {
+  function readFragment() {
+    let raw = location.hash.slice(1);
+    if (!raw) throw new Error("No payload after #");
+    // If it was percent-encoded, decode it. If not, this will just fail silently.
+    try { raw = decodeURIComponent(raw); } catch {}
+    // Remove whitespace accidentally inserted by pipeline/UI
+    raw = raw.replace(/[\r\n\s]/g, "");
+    // Convert base64url -> base64 and pad
+    raw = raw.replace(/-/g, "+").replace(/_/g, "/");
+    while (raw.length % 4) raw += "=";
+    return raw;
   }
+
+  const b64 = readFragment();
+
+  // Decode safely to UTF-8 text
+  const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const html  = new TextDecoder("utf-8").decode(bytes);
+
+  document.open(); document.write(html); document.close();
+})();
 </script>
